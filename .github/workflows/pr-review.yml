@@ -47,3 +47,5 @@ jobs:
           path: pr_diff.txt
       - name: Install dependencies
         run: pip install tiktoken
+      - name: Install OpenAI library
+        run: pip install openai
