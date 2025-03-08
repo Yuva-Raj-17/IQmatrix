@@ -22,3 +22,12 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_MESSAGE: "Workflow succeeded! 🎉"
           SLACK_COLOR: "#36a64f"
+        - name: Send Email Notification via Mailgun
+        run: |
+          curl --request POST \
+            --url https://api.mailgun.net/v3/sandboxeff25f83f3b7454092d48cf3ac3245e8.mailgun.org/messages \
+            --user "api:${{ secrets.MAILGUN_API_KEY }}" \
+            --form "from=Your Workflow <yuvaraj17.4win@gmail.com>" \
+            --form "to=yuvaraj4win.17@gmail.com" \
+            --form "subject=Workflow Status Update" \
+            --form "text=Your GitHub Actions workflow has succeeded! 🎉"
