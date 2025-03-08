@@ -32,3 +32,16 @@ jobs:
             --form "to=yuvaraj4win.17@gmail.com" \
             --form "subject=Workflow Status Update" \
             --form "text=Your GitHub Actions workflow has succeeded! 🎉"
+            - name: Authenticate with GitHub CLI
+          run: |
+           echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+
+      - name: Get PR Diff and Save to File
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > pr_diff.txt
+          
+      - name: Upload PR Diff as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr-diff
+          path: pr_diff.txt
