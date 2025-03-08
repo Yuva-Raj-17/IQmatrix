@@ -32,33 +32,31 @@ jobs:
             --form "to=yuvaraj4win.17@gmail.com" \
             --form "subject=Workflow Status Update" \
             --form "text=Your GitHub Actions workflow has succeeded! 🎉"
-            - name: Authenticate with GitHub CLI
-          run: |
-           echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+
+      - name: Authenticate with GitHub CLI
+        run: |
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
 
       - name: Get PR Diff and Save to File
         run: |
           gh pr diff ${{ github.event.pull_request.number }} > pr_diff.txt
           
       - name: Upload PR Diff as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pr-diff
           path: pr_diff.txt
-      - name: Install dependencies
-        run: pip install tiktoken
-      - name: Install OpenAI library
-        run: pip install openai
-      - name: Extract PR diff
-        run: |
-          git fetch origin $GITHUB_BASE_REF
-          git fetch origin $GITHUB_HEAD_REF
-          git diff $GITHUB_BASE_REF...$GITHUB_HEAD_REF > pr_diff.txt
 
       - name: Install dependencies
         run: |
           pip install tiktoken
           pip install openai
+
+      - name: Extract PR diff
+        run: |
+          git fetch origin $GITHUB_BASE_REF
+          git fetch origin $GITHUB_HEAD_REF
+          git diff $GITHUB_BASE_REF...$GITHUB_HEAD_REF > pr_diff.txt
 
       - name: Split PR diff into chunks
         run: |
