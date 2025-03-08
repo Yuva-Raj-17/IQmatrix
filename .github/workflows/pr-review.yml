@@ -16,3 +16,9 @@ jobs:
           echo "Using GH_TOKEN for authentication"
           gh auth login --with-token <<< "${{ secrets.GH_TOKEN }}"
 
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: "Workflow succeeded! 🎉"
+          SLACK_COLOR: "#36a64f"
