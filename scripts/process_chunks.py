@@ -1,7 +1,6 @@
 import openai
 import os
 
-# Set OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Get detected languages from environment variable
@@ -14,13 +13,11 @@ for i in range(len(chunks)):
 
     # Customize prompt based on detected language
     if "Python" in detected_languages:
-        system_prompt = "You are a Python code reviewer. Analyze the following PR diff:"
+        system_prompt = "You are a Python code reviewer. Analyze the following PR diff and provide feedback in a clear, structured format:"
     elif "JavaScript" in detected_languages:
-        system_prompt = "You are a JavaScript code reviewer. Analyze the following PR diff:"
-    elif "PHP" in detected_languages:
-        system_prompt = "You are a PHP code reviewer. Analyze the following PR diff:"
+        system_prompt = "You are a JavaScript code reviewer. Analyze the following PR diff and provide feedback in a clear, structured format:"
     else:
-        system_prompt = "You are a code reviewer. Analyze the following PR diff:"
+        system_prompt = "You are a code reviewer. Analyze the following PR diff and provide feedback in a clear, structured format:"
 
     # Send the chunk to OpenAI for analysis
     response = openai.ChatCompletion.create(
@@ -30,4 +27,17 @@ for i in range(len(chunks)):
             {"role": "user", "content": chunk}
         ]
     )
-    print(response["choices"][0]["message"]["content"])
+
+    # Format the feedback
+    feedback = response["choices"][0]["message"]["content"]
+    formatted_feedback = f"""
+    ### Code Review Feedback
+
+    **Summary:**
+    {feedback.split('.')[0]}.
+
+    **Detailed Feedback:**
+    - {feedback.replace('. ', '.\n- ')}
+    """
+
+    print(formatted_feedback)
