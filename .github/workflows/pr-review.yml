@@ -109,3 +109,25 @@ jobs:
       - name: Post review comments
         run: |
           python3 scripts/post_comments.py
+            - name: Detect programming language and security-sensitive files
+            run: |
+          echo "CHANGED_FILES=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_ENV
+          echo "DETECTED_LANGUAGES=$(python3 scripts/detect_language.py | head -n 1)" >> $GITHUB_ENV
+          echo "SECURITY_FILES=$(python3 scripts/detect_language.py | tail -n 1)" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          pip install tiktoken
+          pip install openai
+
+      - name: Split PR diff into chunks
+        run: |
+          python3 scripts/split_diff.py
+
+      - name: Process each chunk with OpenAI
+        run: |
+          python3 scripts/process_chunks.py
+
+      - name: Post review comments
+        run: |
+          python3 scripts/post_comments.py
