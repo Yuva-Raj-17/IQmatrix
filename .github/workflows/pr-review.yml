@@ -65,3 +65,13 @@ jobs:
       - name: Process each chunk with OpenAI
         run: |
           python3 scripts/process_chunks.py
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          since_last_remote_commit: true
+
+      - name: Detect programming language
+        run: |
+          echo "CHANGED_FILES=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_ENV
+          python3 scripts/detect_language.py
