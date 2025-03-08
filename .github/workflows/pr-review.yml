@@ -88,3 +88,24 @@ jobs:
       - name: Process each chunk with OpenAI
         run: |
           python3 scripts/process_chunks.py
+      - name: Detect programming language
+        run: |
+          echo "CHANGED_FILES=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_ENV
+          echo "DETECTED_LANGUAGES=$(python3 scripts/detect_language.py)" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          pip install tiktoken
+          pip install openai
+
+      - name: Split PR diff into chunks
+        run: |
+          python3 scripts/split_diff.py
+
+      - name: Process each chunk with OpenAI
+        run: |
+          echo "FORMATTED_FEEDBACK=$(python3 scripts/process_chunks.py)" >> $GITHUB_ENV
+
+      - name: Post review comments
+        run: |
+          python3 scripts/post_comments.py
