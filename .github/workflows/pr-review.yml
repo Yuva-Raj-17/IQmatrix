@@ -49,3 +49,21 @@ jobs:
         run: pip install tiktoken
       - name: Install OpenAI library
         run: pip install openai
+      - name: Extract PR diff
+        run: |
+          git fetch origin $GITHUB_BASE_REF
+          git fetch origin $GITHUB_HEAD_REF
+          git diff $GITHUB_BASE_REF...$GITHUB_HEAD_REF > pr_diff.txt
+
+      - name: Install dependencies
+        run: |
+          pip install tiktoken
+          pip install openai
+
+      - name: Split PR diff into chunks
+        run: |
+          python3 scripts/split_diff.py
+
+      - name: Process each chunk with OpenAI
+        run: |
+          python3 scripts/process_chunks.py
