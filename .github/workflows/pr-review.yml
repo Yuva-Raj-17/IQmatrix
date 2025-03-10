@@ -55,7 +55,7 @@ jobs:
 
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v1
-        env:
+        with:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_MESSAGE: "Workflow succeeded! 🎉"
           SLACK_COLOR: "#36a64f"
