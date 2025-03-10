@@ -56,9 +56,9 @@ jobs:
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v1
         with:
-          channel-id: "C08GVAZ1F6X"
+          channel-id: "C08H1DDSAP5"
           slack-message: "Workflow succeeded! 🎉"
-          payload: ""
+          payload: '{ "text": "🚀 Workflow succeeded!", "attachments": [{ "text": "Click here to view", "color": "#36a64f" }] }'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
