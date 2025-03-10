@@ -56,9 +56,12 @@ jobs:
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v1
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          channel-id: "C08GVAZ1F6X"
           slack-message: "Workflow succeeded! 🎉"
-          slack-color: "#36a64f"
+          payload: ""
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 
       - name: Send Email Notification via Mailgun
         run: |
