@@ -9,19 +9,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Authenticate with GitHub
+      - name: Authenticate with GitHub CLI
         run: |
-          echo "Using GH_TOKEN for authentication"
-          gh auth login --with-token <<< "${{ secrets.GH_TOKEN }}"
+          echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
+
+      - name: Get PR Diff and Save to File
+        run: |
+          gh pr diff ${{ github.event.pull_request.number }} > pr_diff.txt
+
+      - name: Upload PR Diff as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-diff
+          path: pr_diff.txt
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          since_last_remote_commit: true
+
+      - name: Detect programming language and security-sensitive files
+        run: |
+          echo "CHANGED_FILES=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_ENV
+          echo "DETECTED_LANGUAGES=$(python3 scripts/detect_language.py | head -n 1)" >> $GITHUB_ENV
+          echo "SECURITY_FILES=$(python3 scripts/detect_language.py | tail -n 1)" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          pip install tiktoken openai
+
+      - name: Split PR diff into chunks
+        run: |
+          python3 scripts/split_diff.py
+
+      - name: Process each chunk with OpenAI
+        run: |
+          echo "FORMATTED_FEEDBACK=$(python3 scripts/process_chunks.py)" >> $GITHUB_ENV
+
+      - name: Post review comments
+        run: |
+          python3 scripts/post_comments.py
 
       - name: Send Slack Notification
         uses: slackapi/slack-github-action@v1
+        with:
+          channel-id: "C08H1DDSAP5"
+          slack-message: "Workflow succeeded! 🎉"
+          payload: '{ "text": "🚀 Workflow succeeded!", "attachments": [{ "text": "Click here to view", "color": "#36a64f" }] }'
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_MESSAGE: "Workflow succeeded! 🎉"
-          SLACK_COLOR: "#36a64f"
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
 
       - name: Send Email Notification via Mailgun
         run: |
@@ -32,16 +72,3 @@ jobs:
             --form "to=yuvaraj4win.17@gmail.com" \
             --form "subject=Workflow Status Update" \
             --form "text=Your GitHub Actions workflow has succeeded! 🎉"
-            - name: Authenticate with GitHub CLI
-          run: |
-           echo "${{ secrets.GH_TOKEN }}" | gh auth login --with-token
-
-      - name: Get PR Diff and Save to File
-        run: |
-          gh pr diff ${{ github.event.pull_request.number }} > pr_diff.txt
-          
-      - name: Upload PR Diff as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: pr-diff
-          path: pr_diff.txt
